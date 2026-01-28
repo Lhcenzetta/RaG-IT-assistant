@@ -60,11 +60,13 @@ Answer the question using ONLY the context below.
 If the answer is not in the context, say "I don't know".
 
 Context:
-"It is the best player in the wirld"
+{content}
 
 Question:
 {question}
 """)
+
+# Debugging step
 
 
 llm = ChatGoogleGenerativeAI(
@@ -86,12 +88,30 @@ rag_chain = (
 )
 
 
-query = "What is IT"
+query = "What is a messi"
 
-response = rag_chain.invoke(query)
+results = db.similarity_search_with_relevance_scores(query, k=3)
 
-print("==== RESPONSE ====")
-print(response.content)
+SIMILARITY_THRESHOLD = 0.4
 
+def safe_retrieve(query: str):
+    results = db.similarity_search_with_relevance_scores(query, k=3)
 
-print("")
+    filtered_docs = [
+        doc for doc, score in results if score >= SIMILARITY_THRESHOLD
+    ]
+
+    if not filtered_docs:
+        return None  
+
+    return filtered_docs
+query = "What is a computer"
+
+docs = safe_retrieve(query)
+
+if docs is None:
+    print("I don't know (not in the PDF)")
+else:
+    print("Retrieved chunks:")
+    for d in docs:
+        print(d.page_content[:300])
