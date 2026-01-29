@@ -41,7 +41,7 @@ def Handle_query(query):
 
 
 
-query = " an IntroduCtIon to It Support"
+query = " what is computer"
 
 result = Handle_query(query)
 print(result)
