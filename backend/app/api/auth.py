@@ -3,7 +3,7 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.get("/homeç")
+@router.post("/Signup")
 def home():
     return "success"
 
