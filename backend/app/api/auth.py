@@ -1,10 +1,19 @@
+from fastapi.security import HTTPAuthorizationCredentials,HTTPBearer
 from sqlalchemy.orm import Session
-from fastapi import APIRouter , Depends, HTTPException
+from fastapi import APIRouter , Depends, HTTPException, status
 from db.models import User
 from db import shcema
 from datetime import datetime
 from db.session import get_db
 from passlib.context import CryptContext
+from jose import jwt, JWTError
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+algorithme = "HS256"
+SECRET_KEY  = os.getenv("SECRET_KEY")
+barear_chema = HTTPBearer()
 router = APIRouter()
 
 
@@ -17,7 +26,21 @@ def verfiy_hash_passsword(new_password , hashed_password):
     return pwd_context.verify(new_password, hashed_password)
 
 def create_token(paylod):
-    
+    return jwt.encode(paylod, SECRET_KEY , algorithm=algorithme)
+
+def decode_token(token):
+    return jwt.decode(token , SECRET_KEY , algorithms=algorithme)
+
+def verfiy_token(cre: HTTPAuthorizationCredentials = Depends(barear_chema)):
+    token = cre.credentials
+    decode = decode_token(token)
+    if decode is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='this toke is invalide'
+        )
+    return decode
+        
 
 
 @router.post("/Signup")

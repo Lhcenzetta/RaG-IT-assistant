@@ -9,3 +9,6 @@ class CreateUser(BaseModel):
 class Checkuser:
     email : str
     hashedpassword : str
+
+    class config:
+        orm_mode = True
