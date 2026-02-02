@@ -5,3 +5,7 @@ class CreateUser(BaseModel):
     hashedpassword : str
     is_active : bool
     created_at : str
+
+class Checkuser:
+    email : str
+    hashedpassword : str

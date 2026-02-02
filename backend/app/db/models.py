@@ -9,7 +9,7 @@ class User(Base):
     id = Column(Integer, autoincrement=True , primary_key=True)
     email = Column(String)
     hashedpassword = Column(String)
-    isactive = Column(Boolean)
+    is_active = Column(Boolean)
     created_at = Column(String)
 
     queries = relationship("Query" ,back_populates="user")
