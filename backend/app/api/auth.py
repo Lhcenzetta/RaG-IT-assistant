@@ -42,7 +42,6 @@ def verfiy_token(cre: HTTPAuthorizationCredentials = Depends(barear_chema)):
     return decode
         
 
-
 @router.post("/Signup")
 def home(user : shcema.CreateUser , db : Session = Depends(get_db)):
     exist_user = db.query(User).filter(user.email == User.email).first()
@@ -62,14 +61,17 @@ def home(user : shcema.CreateUser , db : Session = Depends(get_db)):
 
 
 @router.post("/login")
-def login(user : shcema.Checkuser , db : Session = Depends(get_db)):
+def login(user: shcema.Checkuser , db:Session = Depends(get_db)):
     exit_user = db.query(User).filter(user.email == User.email).first()
     if not exit_user:
         raise HTTPException(status_code=400 , detail="This user doesn't exist ! please login")
-    if not verfiy_hash_passsword(user.hashedpassword, User.hashedpassword):
+    if not verfiy_hash_passsword(user.hashedpassword,exit_user.hashedpassword):
         raise HTTPException(status_code=400 , detail="Password invalid")
     
     paylod = {"email":user.email }
     token  = create_token(paylod)
-        
+    return{"token" : token , "token_type" : "bearer"}
 
+@router.get("/get")
+def get(db:Session = Depends(get_db) ,cred = Depends(verfiy_token)):
+    return db.query(User).all()

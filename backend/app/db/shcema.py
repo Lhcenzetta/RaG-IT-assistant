@@ -6,7 +6,7 @@ class CreateUser(BaseModel):
     is_active : bool
     created_at : str
 
-class Checkuser:
+class Checkuser(BaseModel):
     email : str
     hashedpassword : str
 
