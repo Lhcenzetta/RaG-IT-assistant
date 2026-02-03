@@ -10,5 +10,8 @@ class Checkuser(BaseModel):
     email : str
     hashedpassword : str
 
+class Questionner_user(BaseModel):
+    userid : int
+    question : str
     class config:
         orm_mode = True

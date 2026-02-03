@@ -10,8 +10,10 @@ sentence-transformers
 
 pypdf
 python-dotenv
-
+pandas 
+numpy
 fastapi
 uvicorn
 passlib[bcrypt]
+matplotlib
 jose 

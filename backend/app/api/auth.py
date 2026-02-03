@@ -1,13 +1,17 @@
 from fastapi.security import HTTPAuthorizationCredentials,HTTPBearer
+from api.Pipline_retriver import Handle_query
 from sqlalchemy.orm import Session
 from fastapi import APIRouter , Depends, HTTPException, status
-from db.models import User
+from db.models import User, Query
 from db import shcema
 from datetime import datetime
 from db.session import get_db
 from passlib.context import CryptContext
+import joblib
+from langchain_huggingface import HuggingFaceEmbeddings
 from jose import jwt, JWTError
 import os
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,8 +19,6 @@ algorithme = "HS256"
 SECRET_KEY  = os.getenv("SECRET_KEY")
 barear_chema = HTTPBearer()
 router = APIRouter()
-
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def create_hash_mode_pass(password):
@@ -72,6 +74,36 @@ def login(user: shcema.Checkuser , db:Session = Depends(get_db)):
     token  = create_token(paylod)
     return{"token" : token , "token_type" : "bearer"}
 
-@router.get("/get")
-def get(db:Session = Depends(get_db) ,cred = Depends(verfiy_token)):
-    return db.query(User).all()
+
+@router.post("/query")
+def query(query_user :shcema.Questionner_user , db : Session = Depends(get_db)):
+    exist_user = db.query(User).filter(query_user.userid == User.id).first()
+    if not exist_user:
+        raise HTTPException(status_code=400 , detail="Please check again this user n'exist pas")
+    # answer = Handle_query(query_user.question)
+
+    embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+    model_path = os.getenv("model_path")
+    loaded_model = joblib.load(model_path)
+    query_embedding = embedding.aembed_query(query)
+    cluster_number = loaded_model.predict([query_embedding])
+    new_query_user = Query(
+        userid = exist_user.id,
+        question = query_user.question,
+        # answer = answer,
+        # cluster = cluster_number[0]
+    )
+    return cluster_number
+
+
+
+
+@router.delete("/delete_user/{user_id}")
+def delete_user(user_id :int , db:Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404 , detail="User not found")
+    db.delete(user)
+    db.commit()
+    return {"detail" : "User deleted successfully"}
