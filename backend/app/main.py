@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from db.models import Base
+from backend.app.db.models import Base
 from db.database import engine
 from api  import auth 
 

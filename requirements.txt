@@ -16,5 +16,6 @@ fastapi
 uvicorn
 passlib[bcrypt]
 matplotlib
-jose 
+python-jose 
 mlflow
+psycopg2-binary
