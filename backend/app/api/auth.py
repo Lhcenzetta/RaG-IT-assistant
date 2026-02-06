@@ -15,6 +15,8 @@ import time
 from dotenv import load_dotenv
 
 load_dotenv()
+embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+model_path = os.getenv("model_path")
 algorithme = "HS256"
 SECRET_KEY  = os.getenv("SECRET_KEY")
 barear_chema = HTTPBearer()
@@ -76,31 +78,35 @@ def login(user: shcema.Checkuser , db:Session = Depends(get_db)):
 
 
 @router.post("/query")
-def query(query_user :shcema.Questionner_user , db : Session = Depends(get_db)):
+async def query(query_user :shcema.Questionner_user ,cre = Depends(verfiy_token), db : Session = Depends(get_db)):
     exist_user = db.query(User).filter(query_user.userid == User.id).first()
     if not exist_user:
         raise HTTPException(status_code=400 , detail="Please check again this user n'exist pas")
-    # answer = Handle_query(query_user.question)
-
-    embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-    model_path = os.getenv("model_path")
+    start_time = time.perf_counter()
+    answer = Handle_query(query_user.question)
     loaded_model = joblib.load(model_path)
-    query_embedding = embedding.aembed_query(query)
-    cluster_number = loaded_model.predict([query_embedding])
+    query_embedding = await embedding.aembed_query(query_user.question)
+    cluster_number = int(loaded_model.predict([query_embedding])[0])
+    end_time = (time.perf_counter() - start_time) * 1000
     new_query_user = Query(
         userid = exist_user.id,
         question = query_user.question,
-        # answer = answer,
-        # cluster = cluster_number[0]
+        answer = answer,
+        cluster = cluster_number,
+        latency_ms = end_time,
+        created_at = datetime.utcnow()
+
     )
-    return cluster_number
+    db.add(new_query_user)
+    db.commit()
+    db.refresh(new_query_user)
+    return new_query_user
 
 
 
 
 @router.delete("/delete_user/{user_id}")
-def delete_user(user_id :int , db:Session = Depends(get_db)):
+def delete_user(user_id :int , db:Session = Depends(get_db), cre = Depends(verfiy_token)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404 , detail="User not found")
