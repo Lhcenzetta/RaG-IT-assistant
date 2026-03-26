@@ -7,3 +7,4 @@ DataBase_URL = f"postgresql+psycopg2://{os.getenv('user')}:{os.getenv('password'
 engine = create_engine(DataBase_URL)
 
 Base = declarative_base()
+

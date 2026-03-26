@@ -41,7 +41,7 @@ def Handle_query(query):
 
 
 
-query = " what is computer"
+query = "who is Mike Halsey"
 
 result = Handle_query(query)
 print(result)

@@ -26,3 +26,11 @@ class Query(Base):
     created_at = Column(String)
 
     user = relationship("User" ,back_populates="queries")
+
+class Vector(Base):
+    __tablename__ = "vector"
+
+    id = Column(Integer, autoincrement=True , primary_key=True)
+    queryid = Column(Integer , ForeignKey("query.d"), nullable=False)
+    vector = Column(String)
+    created_at = Column(String) 
