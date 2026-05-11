@@ -26,7 +26,7 @@ RaG-IT-assistant/
 ├── docker-compose.yml    # Docker Compose configuration for PostgreSQL and FastAPI app
 ├── dockerfile            # Dockerfile for deploying the FastAPI backend
 ├── requirements.txt      # Python dependencies
-├── test.py               # Testing script with MLflow tracking integration
+├── test.py             
 └── README.md
 ```
 
